@@ -1,8 +1,87 @@
 import pandas as pd
+import numpy as np
 import re
 import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
+
+def plot_site_variables(site_name: str, site_data, days: list = None, n_cols: int = 2, figsize: tuple = (10, 6), show_legend: bool = True):
+    """
+    Plots all site variables for a specific site on an hourly basis for a specified list of days. 
+    If multiple days are provided, plots are arranged in a grid with a variable number of columns.
+
+    Parameters
+    ----------
+    site_name : str
+        The name of the site to plot data for.
+    site_data : pandas.DataFrame
+        A DataFrame containing the data for the specified site. It should contain columns:
+        ['site_name', 'day', 'hour', 'solar_zenith_angle', 'clearsky_dhi', 'clearsky_dni',
+        'clearsky_ghi', 'relative_humidity', 'dhi', 'dni', 'ghi', 'energy_outputkwh'].
+    days : list, optional
+        A list of days to plot. If None, plots for all days available in the site data.
+    n_cols : int, optional
+        The number of columns in the plot grid. Default is 2.
+    figsize : tuple, optional
+        The size of the figure for the plots. Default is (10, 6).
+    show_legend : bool, optional
+        Whether to display the legend on the plots. Default is True.
+
+    Returns
+    -------
+    None
+        Displays plots of all the variables for the specified days on an hourly basis.
+    """
+    # Filter data by the specified site name
+    site_data_filtered = site_data[site_data['site_name'] == site_name]
+
+    # If no specific days are provided, use all unique days in the data
+    if days is None:
+        days = site_data_filtered['day'].unique()
+    
+    # Get the list of variables to plot (excluding 'site_name', 'day', and 'hour')
+    variables = [col for col in site_data_filtered.columns if col not in ['site_name', 'day', 'hour']]
+    
+    # Calculate the number of rows needed in the grid
+    n_rows = (len(days) + n_cols - 1) // n_cols  # Ceiling division to get the number of rows
+
+    # Adjust figure size and create subplots
+    if n_cols == 1:
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(figsize[0], figsize[1] * n_rows), sharex=True, sharey=False)
+        axes = axes if isinstance(axes, np.ndarray) else [axes]  # Ensure axes is always a list
+    else:
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize, sharex=True, sharey=False)
+        axes = axes.flatten()  # Flatten the axes array to easily index
+
+    # Loop through each day and create a plot
+    for i, day in enumerate(days):
+        # Filter data for the current day
+        daily_data = site_data_filtered[site_data_filtered['day'] == day]
+        
+        # Plot all variables in one chart for the current day
+        for var in variables:
+            sns.lineplot(data=daily_data, x='hour', y=var, ax=axes[i], label=var if show_legend else None)
+
+        # Set plot details
+        axes[i].set_title(f'Site: {site_name} - Day: {day}', fontsize=12)
+        axes[i].set_xlabel('Hour')
+        axes[i].set_ylabel('Value')
+        axes[i].grid(True)
+        
+        # Show or hide the legend based on the parameter
+        if show_legend:
+            axes[i].legend(title='Variables')
+        else:
+            axes[i].get_legend().remove()
+
+    # Hide any unused subplots if days are less than n_rows * n_cols
+    if n_cols > 1:
+        for j in range(len(days), len(axes)):
+            fig.delaxes(axes[j])
+
+    plt.tight_layout()
+    plt.show()
+
 
 def print_folder_tree(directory_path: Path, prefix: str = ""):
     """
