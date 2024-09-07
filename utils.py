@@ -5,6 +5,50 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+def plot_boxplot(df, variables=None, figsize=(12, 8)):
+    """
+    Plots a boxplot for the specified numeric variables in a DataFrame to visually compare their ranges.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame containing the data to plot.
+    variables : list, optional
+        A list of column names to plot. If None, plots all numeric columns. Default is None.
+    figsize : tuple, optional
+        The size of the figure for the boxplot. Default is (12, 8).
+
+    Returns
+    -------
+    None
+        Displays a boxplot for the specified numeric variables in the DataFrame.
+    """
+    # Select only numeric columns if variables are not specified
+    if variables is None:
+        variables = df.select_dtypes(include='number').columns
+    else:
+        # Ensure the specified variables are numeric
+        variables = [var for var in variables if var in df.select_dtypes(include='number').columns]
+    
+    # Check if there are any variables to plot
+    if not variables:
+        print("No numeric variables to plot.")
+        return
+
+    # Set figure size
+    plt.figure(figsize=figsize)
+
+    # Plot the boxplot for the specified variables
+    sns.boxplot(data=df[variables])
+    
+    # Set plot details
+    plt.title('Boxplot of Selected Numeric Variables')
+    plt.xticks(rotation=45)
+    plt.grid(True)
+    plt.show()
+
+
+
 def plot_site_variables(site_name: str, site_data, days: list = None, n_cols: int = 2, figsize: tuple = (10, 6), show_legend: bool = True):
     """
     Plots all site variables for a specific site on an hourly basis for a specified list of days. 
