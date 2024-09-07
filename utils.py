@@ -5,6 +5,60 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+def plot_correlation_and_hour_variation(df, target_variable='energy_outputkwh', figsize=(14, 6)):
+    """
+    Computes and plots a subplot with the correlation of each variable with the target variable
+    and the variation of the target variable across hours.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame containing the data to analyze.
+    target_variable : str, optional
+        The name of the target variable to correlate with. Default is 'energy_outputkwh'.
+    figsize : tuple, optional
+        The size of the figure for the subplot. Default is (14, 6).
+
+    Returns
+    -------
+    None
+        Displays a subplot with the correlation bar plot and energy output variation across hours.
+    """
+    # Select relevant columns, excluding 'hour' but including the target variable
+    relevant_columns = ['solar_zenith_angle', 'clearsky_dhi', 'clearsky_dni', 
+                        'clearsky_ghi', 'relative_humidity', 'dhi', 'dni', 'ghi', target_variable]
+    
+    # Filter the DataFrame to only include relevant columns
+    df_filtered = df[relevant_columns]
+
+    # Compute the correlation of each variable with the target variable
+    correlations = df_filtered.corr()[target_variable].drop(target_variable)
+    
+    # Sort correlations by absolute value for better visualization
+    correlations_sorted = correlations.abs().sort_values(ascending=False)
+
+    # Create a subplot with 1 row and 2 columns
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+
+    # Plot the bar plot of correlations
+    sns.barplot(x=correlations_sorted.index, y=correlations_sorted.values, palette='coolwarm', ax=axes[0])
+    axes[0].set_title(f'Correlation of Variables with {target_variable}')
+    axes[0].set_ylabel('Correlation Coefficient')
+    axes[0].set_xticklabels(correlations_sorted.index, rotation=45)
+    axes[0].grid(True)
+
+    # Plot the variation of energy output across hours
+    sns.lineplot(x='hour', y=target_variable, data=df, ax=axes[1], marker='o')
+    axes[1].set_title(f'Variation of {target_variable} Across Hours')
+    axes[1].set_xlabel('Hour')
+    axes[1].set_ylabel(target_variable)
+    axes[1].grid(True)
+
+    # Adjust layout for better display
+    plt.tight_layout()
+    plt.show()
+
+
 def plot_boxplot(df, variables=None, figsize=(12, 8)):
     """
     Plots a boxplot for the specified numeric variables in a DataFrame to visually compare their ranges.
