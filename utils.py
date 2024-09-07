@@ -5,6 +5,79 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+
+def plot_hourly_energy_variation(df, figsize=(12, 6)):
+    """
+    Plots the variation of energy_outputkwh per hour across multiple days using a boxplot.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame containing 'day', 'hour', and 'energy_outputkwh'.
+    figsize : tuple, optional
+        The size of the figure for the plot. Default is (12, 6).
+
+    Returns
+    -------
+    None
+        Displays the box plot showing the variation of energy output per hour.
+    """
+    # Set up the figure for plotting
+    plt.figure(figsize=figsize)
+
+    # Create a boxplot to show the distribution of energy output for each hour
+    sns.boxplot(x='hour', y='energy_outputkwh', data=df)
+
+    # Set plot labels and title
+    plt.xlabel('Hour of the Day')
+    plt.ylabel('Energy Output (kWh)')
+    plt.title('Variation of Energy Output per Hour Across 60 Days')
+    plt.grid(True)
+    plt.show()
+
+
+def plot_means(df_output, df_total, figsize=(10, 6)):
+    """
+    Plots the means of energy output (energy_outputkwh) and total energy (total_energykwh)
+    for each hour across all days.
+
+    Parameters
+    ----------
+    df_output : pandas.DataFrame
+        The DataFrame containing 'day', 'hour', and 'energy_outputkwh'.
+    df_total : pandas.DataFrame
+        The DataFrame containing 'day', 'hour', and 'total_energykwh'.
+    figsize : tuple, optional
+        The size of the figure for the plot. Default is (10, 6).
+
+    Returns
+    -------
+    None
+        Displays the line plot showing the means for each hour.
+    """
+    # Merge the two dataframes on 'day' and 'hour'
+    df_merged = pd.merge(df_output, df_total, on=['day', 'hour'], how='inner')
+
+    # Calculate mean for each hour across all days
+    mean_stats = df_merged.groupby('hour')[['energy_outputkwh', 'total_energykwh']].mean().reset_index()
+
+    # Set up the figure for plotting
+    plt.figure(figsize=figsize)
+
+    # Plot mean values across all days
+    plt.plot(mean_stats['hour'], mean_stats['energy_outputkwh'], color='blue', marker='o', linestyle='-', label='Mean Energy Output', linewidth=2)
+    plt.plot(mean_stats['hour'], mean_stats['total_energykwh'], color='red', marker='x', linestyle='--', label='Mean Total Energy', linewidth=2)
+
+    # Set plot labels and title
+    plt.xlabel('Hour')
+    plt.ylabel('Energy (kWh)')
+    plt.title('Means of Energy Output and Total Energy Across Hours')
+    plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+
 def plot_correlation_and_hour_variation(df, target_variable='energy_outputkwh', figsize=(14, 6)):
     """
     Computes and plots a subplot with the correlation of each variable with the target variable
