@@ -5,10 +5,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-
-import matplotlib.pyplot as plt
-
 def plot_time_series_site_variables(data, site_name, variables, start=None, end=None, figsize=(22, 5), legend=True):
     """
     Plots time series for a specific site and multiple variables in the data, with options 
@@ -69,7 +65,6 @@ def plot_time_series_site_variables(data, site_name, variables, start=None, end=
     # Display the plot
     plt.show()
 
-
 def plot_hourly_energy_variation(df, figsize=(12, 6)):
     """
     Plots the variation of energy_outputkwh per hour across multiple days using a boxplot.
@@ -98,7 +93,6 @@ def plot_hourly_energy_variation(df, figsize=(12, 6)):
     plt.title('Variation of Energy Output per Hour Across 60 Days')
     plt.grid(True)
     plt.show()
-
 
 def plot_means(df_output, df_total, figsize=(10, 6)):
     """
@@ -140,7 +134,6 @@ def plot_means(df_output, df_total, figsize=(10, 6)):
     plt.grid(True)
     plt.tight_layout()
     plt.show()
-
 
 def plot_correlation_and_hour_variation(df, target_variable='energy_outputkwh', figsize=(14, 6)):
     """
@@ -195,7 +188,6 @@ def plot_correlation_and_hour_variation(df, target_variable='energy_outputkwh', 
     plt.tight_layout()
     plt.show()
 
-
 def plot_boxplot(df, variables=None, figsize=(12, 8)):
     """
     Plots a boxplot for the specified numeric variables in a DataFrame to visually compare their ranges.
@@ -237,8 +229,6 @@ def plot_boxplot(df, variables=None, figsize=(12, 8)):
     plt.xticks(rotation=45)
     plt.grid(True)
     plt.show()
-
-
 
 def plot_site_variables(site_name: str, site_data, days: list = None, n_cols: int = 2, figsize: tuple = (10, 6), show_legend: bool = True):
     """
@@ -317,7 +307,6 @@ def plot_site_variables(site_name: str, site_data, days: list = None, n_cols: in
     plt.tight_layout()
     plt.show()
 
-
 def print_folder_tree(directory_path: Path, prefix: str = ""):
     """
     Recursively prints the directory tree structure starting from the given directory path.
@@ -349,7 +338,6 @@ def print_folder_tree(directory_path: Path, prefix: str = ""):
             # Use the appropriate prefix for sub-items
             extension = "    " if index == len(items) - 1 else "│   "
             print_folder_tree(item, prefix + extension)
-
 
 def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """
