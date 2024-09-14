@@ -5,7 +5,123 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-# Misc
+# SOC
+
+def get_grid_powerkw(row, site_information):
+    """
+    Retrieves the grid power (in kW) for a specific site, day, and hour, considering the grid outage plan.
+
+    Parameters
+    ----------
+    row : pandas.Series
+        A row of a DataFrame containing 'site_name', 'day', and 'hour' which are used to query the grid power information.
+    site_information : pandas.DataFrame
+        A DataFrame containing site-specific information, including 'site_id' and 'grid_outage_plan'. 
+        'site_id' should match the 'site_name' in the row, and 'grid_outage_plan' should be a list representing the outage plan.
+
+    Returns
+    -------
+    float
+        The grid power in kW for the specified site, day, and hour. If the site is not found in the `site_information` DataFrame,
+        or if the grid power cannot be determined, returns `np.nan`.
+    """
+    # Query the site information for the given site_id
+    site_info = site_information.query(f"site_id == '{row.site_name}'").squeeze()
+    
+    # If the site information is empty, return NaN
+    if site_info.empty:
+        return np.nan
+
+    # Retrieve and return the grid power based on the outage plan
+    return get_grid_plan_value(
+        row.day, 
+        row.hour, 
+        site_info.grid_outage_plan, 
+        site_info.grid_powerkw
+    )
+
+def get_grid_plan_value(day, hour, grid_plan, grid_powerkw):
+    """
+    Returns the boolean value from the grid plan for a given day and hour.
+
+    Parameters
+    ----------
+    day : int
+        The day of the week as identified by its number in the days observed for the site.
+    hour : int
+        The hour of the day (0 to 23).
+    grid_plan : list of bool
+        A list of 168 boolean values representing the grid plan for a week.
+    grid_powerkw : float
+        The grid power output in KW.
+
+    Returns
+    -------
+    bool
+        The boolean value from the grid plan for the specified day and hour.
+    """
+    if not (0 <= hour <= 23):
+        raise ValueError("Hour must be between 0 and 23.")
+    if len(grid_plan) != 168:
+        raise ValueError("Grid plan must have exactly 168 values.")
+
+    # Calculate the index in the grid plan list
+    index = ((day - 1) % 7) * 24 + hour
+    
+    return grid_powerkw if grid_plan[index] else 0
+
+def calculate_ct(total_supply_i, load_t, coefficient, rated_capacity, rated_voltage):
+    """
+    Calculates the change in state of charge (c_t) based on supply, load, and equipment specifications.
+
+    Parameters
+    ----------
+    total_supply_i : float
+        The total supply at time t (totalSupply_i).
+    load_t : float
+        The load at time t (load_t).
+    coefficient : float
+        A multiplier coefficient for the calculation.
+    rated_capacity : float
+        The rated capacity of the equipment.
+    rated_voltage : float
+        The rated voltage of the equipment.
+
+    Returns
+    -------
+    float
+        The calculated change in state of charge (c_t).
+    """
+    return (total_supply_i - load_t) * coefficient / (rated_capacity * rated_voltage)
+
+def calculate_soc_at_time_t(soc_change_rates, time_step, init_soc = 0.2):
+    """
+    Calculate the SOC at a specific time t given the initial SOC and a list of SOC change rates.
+
+    Parameters
+    ----------
+    init_soc : float
+        The initial state of charge (SOC) at time t=0. Default as per competition is 0.2
+    soc_change_rates : list of float
+        A list of SOC change rates (ΔSOC) for each time step.
+    time_step : int
+        The specific time step (t) at which to calculate the SOC.
+
+    Returns
+    -------
+    float
+        The SOC at the given time step.
+    """
+    # Sum the change rates from time 0 to the given time_step
+    total_soc_change = sum(soc_change_rates[:time_step+1])
+
+    # Calculate the SOC at time t
+    soc_t = init_soc + total_soc_change
+    
+    return soc_t
+
+# Booleans
+
 def convert_strings_to_booleans(string_list):
     """
     Converts a list of strings representing boolean values to their respective Python boolean values.
