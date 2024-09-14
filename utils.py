@@ -5,6 +5,72 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+# Misc
+def convert_strings_to_booleans(string_list):
+    """
+    Converts a list of strings representing boolean values to their respective Python boolean values.
+
+    Parameters
+    ----------
+    string_list : list of str
+        A list of strings where each string is either 'true' or 'false'.
+
+    Returns
+    -------
+    list of bool
+        A list of boolean values corresponding to the input strings.
+    """
+    # Convert strings to lowercase and map 'true' to True and 'false' to False
+    boolean_list = [s.lower() == 'true' for s in string_list]
+    return boolean_list
+
+# Visualization
+
+def plot_grid_outage(outage_plan, start=None, end=None):
+    """
+    Plots the grid outage plan (a list of boolean values) within a specified range.
+
+    Parameters
+    ----------
+    outage_plan : list of bool
+        A list of boolean values representing the grid outage plan (True for outage, False for no outage).
+    start : int, optional
+        The starting index for the plot (default is the beginning of the list).
+    end : int, optional
+        The ending index for the plot (default is the end of the list).
+
+    Returns
+    -------
+    None
+    """
+    # Handle start and end range, ensuring they are within bounds
+    if start is None:
+        start = 0
+    if end is None:
+        end = len(outage_plan)
+    
+    # Slice the list based on the provided range
+    outage_slice = outage_plan[start:end]
+    
+    # Convert boolean values to integers (True -> 1, False -> 0)
+    outage_as_int = [int(b) for b in outage_slice]
+    
+    # Create a range for the x-axis
+    x_values = range(start, end)
+    
+    # Plotting the outage plan
+    plt.figure(figsize=(12, 6))
+    plt.plot(x_values, outage_as_int, label='Grid Outage (True = Outage)', color='C0')
+    
+    # Add labels and title
+    plt.xlabel('Index (Time)')
+    plt.ylabel('Grid Outage (0 = No Outage, 1 = Outage)')
+    plt.title('Grid Outage Plan')
+    plt.legend()
+    
+    # Display the plot
+    plt.show()
+
 def plot_time_series_site_variables(data, site_name, variables, start=None, end=None, figsize=(22, 5), legend=True):
     """
     Plots time series for a specific site and multiple variables in the data, with options 
