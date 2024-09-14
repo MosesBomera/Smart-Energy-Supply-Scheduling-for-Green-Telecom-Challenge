@@ -5,6 +5,70 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+import matplotlib.pyplot as plt
+
+import matplotlib.pyplot as plt
+
+def plot_time_series_site_variables(data, site_name, variables, start=None, end=None, figsize=(22, 5), legend=True):
+    """
+    Plots time series for a specific site and multiple variables in the data, with options 
+    to limit the time range by specifying a start and end.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The DataFrame containing the time series data. Must have 'site_name', 'day', and 'hour' columns.
+    site_name : str
+        The name of the site to filter the data by.
+    variables : list of str
+        A list of column names representing the variables to be plotted.
+    start : tuple, optional
+        A tuple of (day, hour) representing the start of the time range to plot. 
+        If None, plotting starts from the beginning of the dataset.
+    end : tuple, optional
+        A tuple of (day, hour) representing the end of the time range to plot. 
+        If None, plotting continues until the end of the dataset.
+    figsize : tuple, optional
+        Size of the figure in inches (width, height). Default is (22, 5).
+    legend : bool, optional
+        If True, display the legend on the plot. Default is True.
+
+    Returns
+    -------
+    None
+        Displays the time series plot for the given site and variables within the specified range.
+    
+    Examples
+    --------
+    Plot the time series for 'ghi' and 'dni' variables for 'site_A':
+    
+    >>> plot_time_series_site_variables(data, 'site_A', ['ghi', 'dni'])
+    
+    Plot only the data from day 1, hour 0 to day 3, hour 23 for 'ghi' and 'dni':
+    
+    >>> plot_time_series_site_variables(data, 'site_A', ['ghi', 'dni'], start=(1, 0), end=(3, 23))
+    """
+    # Filter data for the specified site
+    filtered_data = data.query(f"site_name == '{site_name}'").set_index(['day', 'hour'])
+    
+    # Apply start and end filters if provided
+    if start is not None:
+        filtered_data = filtered_data.loc[start:]
+    if end is not None:
+        filtered_data = filtered_data.loc[:end]
+    
+    # Plot each variable
+    ax = filtered_data[variables].plot(figsize=figsize, title=f"Time series for {site_name}", xlabel='Time')
+
+    # Display or hide the legend based on the parameter
+    if legend:
+        ax.legend(loc='upper right')
+    else:
+        ax.get_legend().remove()
+    
+    # Display the plot
+    plt.show()
+
 
 def plot_hourly_energy_variation(df, figsize=(12, 6)):
     """
