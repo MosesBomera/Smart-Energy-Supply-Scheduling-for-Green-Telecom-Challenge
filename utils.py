@@ -70,9 +70,10 @@ def get_grid_plan_value(day, hour, grid_plan, grid_powerkw):
     
     return grid_powerkw if grid_plan[index] else 0
 
-def calculate_ct(total_supply_i, load_t, coefficient, rated_capacity, rated_voltage):
+def calculate_ct(total_supply_i, load_t, battery_discharge_coefficient, battery_charge_coefficient, rated_capacity, rated_voltage):
     """
-    Calculates the change in state of charge (c_t) based on supply, load, and equipment specifications.
+    Calculates the change in state of charge (c_t) based on supply, load, and equipment specifications,
+    with different coefficients for charging and discharging.
 
     Parameters
     ----------
@@ -80,8 +81,10 @@ def calculate_ct(total_supply_i, load_t, coefficient, rated_capacity, rated_volt
         The total supply at time t (totalSupply_i).
     load_t : float
         The load at time t (load_t).
-    coefficient : float
-        A multiplier coefficient for the calculation.
+    battery_discharge_coefficient : float
+        The coefficient used when the load exceeds the total supply (for discharging the battery).
+    battery_charge_coefficient : float
+        The coefficient used when the total supply is greater than or equal to the load (for charging the battery).
     rated_capacity : float
         The rated capacity of the equipment.
     rated_voltage : float
@@ -92,6 +95,12 @@ def calculate_ct(total_supply_i, load_t, coefficient, rated_capacity, rated_volt
     float
         The calculated change in state of charge (c_t).
     """
+    # Use discharge coefficient if load is greater than total supply, else use charge coefficient
+    if load_t > total_supply_i:
+        coefficient = battery_discharge_coefficient
+    else:
+        coefficient = battery_charge_coefficient
+
     return (total_supply_i - load_t) * coefficient / (rated_capacity * rated_voltage)
 
 def calculate_soc_at_time_t(soc_change_rates, time_step, init_soc = 0.2):
