@@ -100,8 +100,9 @@ def calculate_ct(total_supply_i, load_t, battery_discharge_coefficient, battery_
         coefficient = battery_discharge_coefficient
     else:
         coefficient = battery_charge_coefficient
-
-    return (total_supply_i - load_t) * coefficient / (rated_capacity * rated_voltage)
+    
+    # Divide by 1000 to convert total energy from battery to kWh.
+    return (total_supply_i - load_t) * coefficient / ((rated_capacity * rated_voltage)/1000)
 
 def calculate_soc_at_time_t(soc_change_rates, time_step, init_soc = 0.2):
     """
